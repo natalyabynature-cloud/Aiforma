@@ -57,9 +57,19 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex items-center justify-center p-4 selection:bg-brand-500 selection:text-white">
+<body class="font-sans antialiased min-h-screen p-4 selection:bg-brand-500 selection:text-white">
 
-    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-xl overflow-hidden relative">
+    <div class="max-w-6xl mx-auto py-6">
+        <div class="flex justify-center gap-3 mb-6">
+            <button id="show-form-btn" class="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-medium shadow-sm">
+                <i class="fa-solid fa-pen-to-square mr-2"></i>Forma
+            </button>
+            <button id="show-stats-btn" class="px-5 py-2.5 rounded-xl bg-white text-gray-700 font-medium border border-gray-200 shadow-sm hover:bg-gray-50">
+                <i class="fa-solid fa-chart-column mr-2"></i>Statistika
+            </button>
+        </div>
+
+    <div id="form-page" class="bg-white w-full max-w-2xl mx-auto rounded-3xl shadow-xl overflow-hidden relative">
         
         <!-- Formos antraštė -->
         <div class="bg-brand-600 p-8 text-center text-white relative">
@@ -273,9 +283,102 @@
         </div>
     </div>
 
+    <section id="stats-page" class="hidden w-full max-w-6xl mx-auto">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div class="bg-brand-600 p-8 text-white">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">Kelionių statistika</h1>
+                        <p class="text-brand-100 mt-2">Duomenys realiu laiku įkeliami iš Google Sheets per n8n GET webhook.</p>
+                    </div>
+                    <button id="refresh-stats-btn" class="self-start md:self-auto px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 transition font-medium">
+                        <i class="fa-solid fa-rotate mr-2"></i>Atnaujinti
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 md:p-8">
+                <div id="stats-loading" class="py-14 text-center text-gray-500">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-600 mb-3"></i>
+                    <p>Kraunami duomenys...</p>
+                </div>
+
+                <div id="stats-error" class="hidden rounded-2xl bg-red-50 border border-red-100 p-5 text-red-700 mb-6">
+                    <div class="font-semibold mb-1"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Nepavyko gauti statistikos</div>
+                    <p id="stats-error-text" class="text-sm"></p>
+                </div>
+
+                <div id="stats-content" class="hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="rounded-2xl border border-gray-100 p-5">
+                            <p class="text-sm text-gray-500">Iš viso atsakymų</p>
+                            <p id="total-responses" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 p-5">
+                            <p class="text-sm text-gray-500">Populiariausias tikslas</p>
+                            <p id="top-purpose" class="text-xl font-bold text-gray-900 mt-1">—</p>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 p-5">
+                            <p class="text-sm text-gray-500">Populiariausia kompanija</p>
+                            <p id="top-company" class="text-xl font-bold text-gray-900 mt-1">—</p>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 p-5">
+                            <p class="text-sm text-gray-500">Populiariausias biudžetas</p>
+                            <p id="top-budget" class="text-xl font-bold text-gray-900 mt-1">—</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="rounded-2xl border border-gray-100 p-5">
+                            <h2 class="font-semibold text-gray-900 mb-4">Kelionės tikslai</h2>
+                            <div id="purpose-breakdown" class="space-y-3"></div>
+                        </div>
+                        <div class="rounded-2xl border border-gray-100 p-5">
+                            <h2 class="font-semibold text-gray-900 mb-4">Biudžeto pasirinkimai</h2>
+                            <div id="budget-breakdown" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-100 overflow-hidden">
+                        <div class="p-5 border-b border-gray-100 flex items-center justify-between gap-4">
+                            <h2 class="font-semibold text-gray-900">Visi atsakymai</h2>
+                            <span id="last-updated" class="text-xs text-gray-500"></span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50 text-gray-600">
+                                    <tr>
+                                        <th class="text-left px-4 py-3 font-semibold">Tikslas</th>
+                                        <th class="text-left px-4 py-3 font-semibold">Kompanija</th>
+                                        <th class="text-left px-4 py-3 font-semibold">Trukmė</th>
+                                        <th class="text-left px-4 py-3 font-semibold">Biudžetas</th>
+                                        <th class="text-left px-4 py-3 font-semibold">Kontaktai</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stats-table-body" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const WEBHOOK_URL = 'https://primary-production-a3bf1f.up.railway.app/webhook/e77bf55d-b388-4d95-a867-20289652f93f';
+            const STATS_WEBHOOK_URL = 'https://primary-production-a3bf1f.up.railway.app/webhook/e77bf55d-b388-4d95-a867-20289652f93f';
+
+            const formPage = document.getElementById('form-page');
+            const statsPage = document.getElementById('stats-page');
+            const showFormBtn = document.getElementById('show-form-btn');
+            const showStatsBtn = document.getElementById('show-stats-btn');
+            const refreshStatsBtn = document.getElementById('refresh-stats-btn');
+            const statsLoading = document.getElementById('stats-loading');
+            const statsError = document.getElementById('stats-error');
+            const statsErrorText = document.getElementById('stats-error-text');
+            const statsContent = document.getElementById('stats-content');
 
             let currentStep = 1;
             const totalSteps = 5;
@@ -439,6 +542,157 @@
                     submitBtn.disabled = false;
                 }
             });
+
+            function normalizeRows(data) {
+                if (Array.isArray(data)) return data;
+                if (Array.isArray(data?.data)) return data.data;
+                if (Array.isArray(data?.rows)) return data.rows;
+                if (data && typeof data === 'object') return [data];
+                return [];
+            }
+
+            function valueOf(row, ...keys) {
+                for (const key of keys) {
+                    if (row?.[key] !== undefined && row?.[key] !== null) {
+                        return String(row[key]).trim();
+                    }
+                }
+                return '';
+            }
+
+            function countBy(rows, getter) {
+                return rows.reduce((acc, row) => {
+                    const value = getter(row) || 'Nenurodyta';
+                    acc[value] = (acc[value] || 0) + 1;
+                    return acc;
+                }, {});
+            }
+
+            function topValue(counts) {
+                const entries = Object.entries(counts);
+                if (!entries.length) return '—';
+                entries.sort((a, b) => b[1] - a[1]);
+                return entries[0][0];
+            }
+
+            function escapeHtml(value) {
+                return String(value)
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#039;');
+            }
+
+            function renderBreakdown(containerId, counts, total) {
+                const container = document.getElementById(containerId);
+                const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+                if (!entries.length) {
+                    container.innerHTML = '<p class="text-sm text-gray-500">Duomenų nėra.</p>';
+                    return;
+                }
+
+                container.innerHTML = entries.map(([label, count]) => {
+                    const percentage = total ? Math.round((count / total) * 100) : 0;
+                    return `
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-sm mb-1.5">
+                                <span class="font-medium text-gray-700">${escapeHtml(label)}</span>
+                                <span class="text-gray-500">${count} (${percentage}%)</span>
+                            </div>
+                            <div class="h-2.5 rounded-full bg-gray-100 overflow-hidden">
+                                <div class="h-full bg-brand-500 rounded-full" style="width:${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function renderStats(rows) {
+                const purposeCounts = countBy(rows, row => valueOf(row, 'Tikslas', 'tikslas'));
+                const companyCounts = countBy(rows, row => valueOf(row, 'Kompanija', 'kompanija'));
+                const budgetCounts = countBy(rows, row => valueOf(row, 'Biudzetas', 'Biudžetas', 'biudzetas'));
+
+                document.getElementById('total-responses').textContent = rows.length;
+                document.getElementById('top-purpose').textContent = topValue(purposeCounts);
+                document.getElementById('top-company').textContent = topValue(companyCounts);
+                document.getElementById('top-budget').textContent = topValue(budgetCounts);
+
+                renderBreakdown('purpose-breakdown', purposeCounts, rows.length);
+                renderBreakdown('budget-breakdown', budgetCounts, rows.length);
+
+                const tbody = document.getElementById('stats-table-body');
+                if (!rows.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-10 text-center text-gray-500">Google Sheets duomenų nėra.</td></tr>';
+                } else {
+                    tbody.innerHTML = rows.map(row => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">${escapeHtml(valueOf(row, 'Tikslas', 'tikslas') || '—')}</td>
+                            <td class="px-4 py-3">${escapeHtml(valueOf(row, 'Kompanija', 'kompanija') || '—')}</td>
+                            <td class="px-4 py-3">${escapeHtml(valueOf(row, 'Trukme', 'Trukmė', 'trukme') || '—')}</td>
+                            <td class="px-4 py-3">${escapeHtml(valueOf(row, 'Biudzetas', 'Biudžetas', 'biudzetas') || '—')}</td>
+                            <td class="px-4 py-3">${escapeHtml(valueOf(row, 'Kontaktai', 'kontaktai') || '—')}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('last-updated').textContent =
+                    `Atnaujinta: ${new Date().toLocaleString('lt-LT')}`;
+            }
+
+            async function loadStatistics() {
+                statsLoading.classList.remove('hidden');
+                statsError.classList.add('hidden');
+                statsContent.classList.add('hidden');
+
+                try {
+                    const response = await fetch(STATS_WEBHOOK_URL, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        cache: 'no-store'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Webhook grąžino HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const rows = normalizeRows(data);
+                    renderStats(rows);
+
+                    statsLoading.classList.add('hidden');
+                    statsContent.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Klaida gaunant statistiką iš n8n:', error);
+                    statsLoading.classList.add('hidden');
+                    statsErrorText.textContent =
+                        `${error.message}. Jei Postman veikia, bet naršyklė ne, n8n Webhook node įjunkite CORS / pridėkite Access-Control-Allow-Origin antraštę.`;
+                    statsError.classList.remove('hidden');
+                }
+            }
+
+            function setActivePage(page) {
+                const showingStats = page === 'stats';
+                formPage.classList.toggle('hidden', showingStats);
+                statsPage.classList.toggle('hidden', !showingStats);
+
+                showFormBtn.className = showingStats
+                    ? 'px-5 py-2.5 rounded-xl bg-white text-gray-700 font-medium border border-gray-200 shadow-sm hover:bg-gray-50'
+                    : 'px-5 py-2.5 rounded-xl bg-gray-900 text-white font-medium shadow-sm';
+
+                showStatsBtn.className = showingStats
+                    ? 'px-5 py-2.5 rounded-xl bg-gray-900 text-white font-medium shadow-sm'
+                    : 'px-5 py-2.5 rounded-xl bg-white text-gray-700 font-medium border border-gray-200 shadow-sm hover:bg-gray-50';
+
+                if (showingStats) loadStatistics();
+            }
+
+            showFormBtn.addEventListener('click', () => setActivePage('form'));
+            showStatsBtn.addEventListener('click', () => setActivePage('stats'));
+            refreshStatsBtn.addEventListener('click', loadStatistics);
 
             updateUI();
         });
